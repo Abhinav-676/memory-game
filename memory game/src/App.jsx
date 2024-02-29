@@ -8,9 +8,9 @@ const initialLevel = {level: 0,}
 
 async function fetchPoke() {
   const list = []
-  let r = Math.floor(Math.random() * 16)
+  let r = generateRandom(0, 15)
 
-  await fetch("https://pokeapi.co/api/v2/pokemon?limit=100&offset=0")
+  await fetch("https://pokeapi.co/api/v2/pokemon?limit=90&offset=0")
 
   .then(res => {
     return res.json()
@@ -18,19 +18,23 @@ async function fetchPoke() {
 
   .then(res => {
     for(let i = 0; i < 6; i++) {
-      const url = res.results[i + r].url
+      const url = res.results[r].url
       const pokeIndex = url.split('/')[url.split('/').length - 2];
-      const pokeName = res.results[i + r].name 
+      const pokeName = res.results[r].name 
       const newPoke = {
         name: pokeName,
         index: pokeIndex,
       }
-      
+      r += generateRandom(1, 15)
       list.push(newPoke)
     }
   })
 
   return list
+}
+
+function generateRandom(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function App() {
@@ -47,7 +51,7 @@ function App() {
     selected = []
     pokeList = list
     setOver(false)
-    setLevel(initialLevel)
+    setLevel({...initialLevel})
   }
 
   function addToSelected(poke) {
@@ -60,8 +64,7 @@ function App() {
 
   useEffect(()=> {
     fetchPoke().then((list) => {
-      pokeList = list
-      setLevel({level: 0,})
+      resetLevel(list)
     })
   }, [])
 
